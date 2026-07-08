@@ -5,7 +5,7 @@
    ===================================================================== */
 (function () {
   "use strict";
-  const { toast, bs, esc, fakeQR } = window.UI;
+  const { toast, bs, esc } = window.UI;
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 
@@ -51,14 +51,14 @@
     const total = pedidos.length;
     const enProd = pedidos.filter(p => p.estadoPedido === "en_cocina").length;
     const listos = pedidos.filter(p => p.estadoPedido === "listo").length;
-    const porValidar = pedidos.filter(p => p.estadoPago === "pendiente").length;
+    const recaudado = pedidos.reduce((a, p) => a + (p.montoPagado || 0), 0);
 
     const kpis = `
       <div class="kpi-row">
         <div class="card kpi"><span class="kpi-ico">📦</span><div class="kpi-val">${total}</div><div class="kpi-lbl">Pedidos activos</div></div>
         <div class="card kpi"><span class="kpi-ico">👨‍🍳</span><div class="kpi-val">${enProd}</div><div class="kpi-lbl">En producción</div></div>
         <div class="card kpi"><span class="kpi-ico">✅</span><div class="kpi-val">${listos}</div><div class="kpi-lbl">Listos para recojo</div></div>
-        <div class="card kpi"><span class="kpi-ico">⏳</span><div class="kpi-val">${porValidar}</div><div class="kpi-lbl">Pagos por validar</div></div>
+        <div class="card kpi"><span class="kpi-ico">💰</span><div class="kpi-val" style="font-size:1.35rem">${bs(recaudado)}</div><div class="kpi-lbl">Recaudado (activos)</div></div>
       </div>`;
 
     let content;
@@ -122,76 +122,37 @@
     $("#tab-agenda").innerHTML = `<h2 class="panel-title">Agenda de Producción · Capacidad máxima ${Store.CAPACIDAD_MAXIMA_DIARIA} cajas/día</h2>${content}`;
   }
 
-  /* ---------------- Pestaña: Validación de Pagos ---------------- */
+  /* ---------------- Pestaña: Registro de Pagos ---------------- */
   function renderPagos() {
-    const pendientes = Store.getPedidos().filter(p => p.estadoPago === "pendiente");
-    $("#pagosBadge").textContent = pendientes.length;
-    $("#pagosBadge").style.display = pendientes.length ? "" : "none";
+    const pagos = Store.getPedidos().filter(p => p.estadoPago !== "rechazado");
+    const recaudado = pagos.reduce((a, p) => a + (p.montoPagado || 0), 0);
+
+    const resumen = `
+      <div class="kpi-row">
+        <div class="card kpi"><span class="kpi-ico">💳</span><div class="kpi-val">${pagos.length}</div><div class="kpi-lbl">Pagos registrados</div></div>
+        <div class="card kpi"><span class="kpi-ico">💰</span><div class="kpi-val" style="font-size:1.35rem">${bs(recaudado)}</div><div class="kpi-lbl">Total recaudado</div></div>
+        <div class="card kpi"><span class="kpi-ico">⚡</span><div class="kpi-val">Automática</div><div class="kpi-lbl">Aprobación de pagos</div></div>
+      </div>`;
 
     let content;
-    if (!pendientes.length) {
-      content = `<div class="empty"><div class="em-ico">💲</div><p>No hay comprobantes pendientes de validación. ¡Todo al día!</p></div>`;
+    if (!pagos.length) {
+      content = `<div class="empty"><div class="em-ico">💳</div><p>Aún no hay pagos registrados.</p></div>`;
     } else {
-      content = pendientes.map(p => `
-        <div class="card pay-card">
-          <div class="pay-main">
-            <div class="pay-info">
-              <div class="pay-code">Pedido: ${esc(p.code)}</div>
-              <div class="pay-line">Cliente: <b>${esc(p.cliente)}</b></div>
-              <div class="pay-line">Monto: <span class="pay-amount">${bs(p.montoPagado)}</span> <span style="color:var(--muted)">(${esc(p.tipoPago)})</span></div>
-            </div>
-            <div class="pay-qr">${fakeQR(p.code + p.metodoPago)}</div>
-            <a class="view-proof" data-proof="${esc(p.code)}">🖼️ Ver Comprobante<br><small style="font-weight:400">(${esc(p.comprobante)})</small></a>
-            <div class="pay-actions">
-              <button class="btn btn-green btn-sm" data-approve="${esc(p.code)}">✓ Aprobar</button>
-              <button class="btn btn-red btn-sm" data-reject="${esc(p.code)}">✕ Rechazar</button>
-            </div>
-          </div>
-          <div class="pay-foot">
-            <span>📅 Subido: <b>${esc(p.fechaSubida)}</b></span>
-            <span>🏦 Método: <b>${esc(p.metodoPago)}</b></span>
-            <span>Estado: <span class="st-pending">Pendiente de validación</span></span>
-          </div>
-        </div>`).join("");
+      const rows = pagos.map(p => `
+        <tr>
+          <td><span class="mono">${esc(p.code)}</span></td>
+          <td>${esc(p.cliente)}</td>
+          <td><span class="card-tag">💳 ${esc(p.metodoPago)}</span><div style="font-size:.74rem;color:var(--muted)">${esc(p.ref || "")}</div></td>
+          <td><b>${bs(p.montoPagado)}</b><div style="font-size:.74rem;color:var(--muted)">${esc(p.tipoPago)}</div></td>
+          <td>${esc(p.fechaSubida)}</td>
+          <td><span class="badge badge-green">✓ Aprobado</span></td>
+        </tr>`).join("");
+      content = `<div class="table-wrap"><table class="data">
+        <thead><tr><th>Código</th><th>Cliente</th><th>Método</th><th>Monto</th><th>Fecha / hora</th><th>Estado</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
     }
-    $("#tab-pagos").innerHTML = `<h2 class="panel-title">Lista de Comprobantes por Verificar</h2>${content}`;
-
-    $$("[data-approve]").forEach(b => b.addEventListener("click", () => {
-      Store.updatePedido(b.dataset.approve, { estadoPago: "aprobado", estadoPedido: "en_cocina" });
-      toast(`Pago del pedido ${b.dataset.approve} aprobado · producción iniciada`, "ok");
-      renderAll();
-    }));
-    $$("[data-reject]").forEach(b => b.addEventListener("click", () => {
-      Store.updatePedido(b.dataset.reject, { estadoPago: "rechazado" });
-      toast(`Comprobante del pedido ${b.dataset.reject} rechazado`, "error");
-      renderAll();
-    }));
-    $$("[data-proof]").forEach(a => a.addEventListener("click", () => openProof(a.dataset.proof)));
+    $("#tab-pagos").innerHTML = `<h2 class="panel-title">Registro de Pagos · Pasarela automática</h2>${resumen}${content}`;
   }
-
-  /* ---------------- Modal: ver comprobante ---------------- */
-  const proofOverlay = $("#proofOverlay"), proofModal = $("#proofModal");
-  proofModal.style.transition = "transform .22s ease, opacity .22s ease";
-  proofModal.style.opacity = "0"; proofModal.style.visibility = "hidden"; proofModal.style.pointerEvents = "none";
-  function openProof(code) {
-    const p = Store.getPedido(code); if (!p) return;
-    $("#proofTitle").textContent = "Comprobante · " + p.code;
-    $("#proofBody").innerHTML = `
-      <div style="width:200px;height:200px;margin:.5rem auto 1rem;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px">${fakeQR(p.code + p.metodoPago, 25)}</div>
-      <p style="margin:.2rem 0;font-weight:700;color:var(--brown-800)">${esc(p.metodoPago)}</p>
-      <p style="margin:.2rem 0;color:var(--muted);font-size:.9rem">${esc(p.comprobante)} · ${bs(p.montoPagado)}</p>
-      <p style="margin:.6rem 0;font-size:.82rem;color:var(--muted)">Comprobante simulado para demostración del prototipo.</p>`;
-    proofOverlay.classList.add("open");
-    proofModal.style.transform = "translate(-50%,-50%) scale(1)";
-    proofModal.style.opacity = "1"; proofModal.style.visibility = "visible"; proofModal.style.pointerEvents = "auto";
-  }
-  function closeProof() {
-    proofOverlay.classList.remove("open");
-    proofModal.style.transform = "translate(-50%,-50%) scale(.95)";
-    proofModal.style.opacity = "0"; proofModal.style.visibility = "hidden"; proofModal.style.pointerEvents = "none";
-  }
-  $("#closeProof").addEventListener("click", closeProof);
-  proofOverlay.addEventListener("click", closeProof);
 
   /* ---------------- Reiniciar demo ---------------- */
   $("#resetBtn").addEventListener("click", () => {

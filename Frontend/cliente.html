@@ -31,11 +31,17 @@
   <!-- ==================== HERO + TRAZABILIDAD (Interfaz A) ==================== -->
   <section class="hero" id="seguimiento">
     <div class="container hero-grid">
-      <div class="alfajor-stack" aria-hidden="true">
-        <div class="plate"></div>
-        <div class="alfajor a1"><span class="coconut"></span></div>
-        <div class="alfajor a2"><span class="coconut"></span></div>
-        <div class="alfajor choco"></div>
+      <div class="hero-media">
+        <!-- Para usar tu propia foto: coloca la imagen en Frontend/assets/hero.jpg
+             Si no existe, se muestra automáticamente la ilustración de reserva. -->
+        <img class="hero-photo" src="assets/hero.jpg" alt="Alfajores artesanales de Contidelicias"
+             onerror="this.remove();var f=document.getElementById('heroFallback');if(f)f.style.display='grid';" />
+        <div class="alfajor-stack" id="heroFallback" aria-hidden="true" style="display:none">
+          <div class="plate"></div>
+          <div class="alfajor a1"><span class="coconut"></span></div>
+          <div class="alfajor a2"><span class="coconut"></span></div>
+          <div class="alfajor choco"></div>
+        </div>
       </div>
 
       <div class="hero-copy">
@@ -82,7 +88,7 @@
         Comercial Chiriguano (3er Anillo Interno) · Santa Cruz de la Sierra, Bolivia
       </div>
       <div>
-        Atención automatizada 24/7 · <a href="#">WhatsApp</a><br />
+        Atención automatizada 24/7 · Pagos en línea seguros<br />
         <span style="opacity:.7">Prototipo frontend — Proyecto UAGRM</span>
       </div>
     </div>
@@ -102,6 +108,5 @@
   <script src="js/data.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/cliente.js"></script>
-  <script src="js/chatbot.js"></script>
 </body>
 </html>

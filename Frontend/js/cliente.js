@@ -4,7 +4,7 @@
    ===================================================================== */
 (function () {
   "use strict";
-  const { toast, bs, esc, fakeQR } = window.UI;
+  const { toast, bs, esc } = window.UI;
   const $ = (s, r) => (r || document).querySelector(s);
 
   /* ---------------- Carrito (localStorage aparte) ---------------- */
@@ -122,13 +122,6 @@
         <div class="field"><label>Adelanto</label>
           <select id="fPago"><option value="50">50% Adelanto</option><option value="100">100% Total</option></select>
         </div>
-      </div>
-      <div class="field"><label>Método de pago (QR)</label>
-        <select id="fMetodo">
-          <option>QR - Mercantil Santa Cruz</option>
-          <option>QR - Banco Unión</option>
-          <option>QR - BCP</option>
-        </select>
       </div>`;
     foot.innerHTML = `
       <div class="cart-summary"><span>Total del pedido</span><strong>${bs(cartTotal())}</strong></div>
@@ -145,48 +138,81 @@
       draft.cliente = nombre; draft.telefono = tel;
       draft.horaEntrega = $("#fHora").value;
       draft.pct = Number($("#fPago").value);
-      draft.metodoPago = $("#fMetodo").value;
       view = "payment"; renderDrawer();
     };
+  }
+
+  // Detecta la marca de la tarjeta por el primer dígito
+  function marcaTarjeta(num) {
+    const d = num.replace(/\D/g, "");
+    if (/^4/.test(d)) return "Visa";
+    if (/^5/.test(d) || /^2/.test(d)) return "Mastercard";
+    if (/^3/.test(d)) return "Amex";
+    if (/^6/.test(d)) return "Discover";
+    return "Tarjeta";
   }
 
   function renderPayment(body, foot) {
     const total = cartTotal();
     const aPagar = draft.pct === 100 ? total : Math.round(total * 0.5 * 100) / 100;
     body.innerHTML = `
-      <p style="margin-top:0;color:var(--muted);font-size:.9rem">Escanea el QR con tu app bancaria y sube la captura del comprobante. El administrador validará el pago antes de iniciar la producción.</p>
-      <div class="qr-box">
-        <div class="qr-code">${fakeQR(draft.metodoPago + total)}</div>
-        <div>
-          <div style="font-size:.82rem;color:var(--muted)">${esc(draft.metodoPago)}</div>
-          <div style="font-weight:800;font-size:1.4rem;color:var(--brown-800)">${bs(aPagar)}</div>
-          <div style="font-size:.8rem;color:var(--muted)">${draft.pct === 100 ? "Pago total" : "Adelanto 50%"} · Total ${bs(total)}</div>
-        </div>
+      <div class="pay-secure">🔒 Pago en línea seguro · procesado automáticamente</div>
+      <div class="amount-box">
+        <span>Total a pagar ahora</span>
+        <strong>${bs(aPagar)}</strong>
+        <small>${draft.pct === 100 ? "Pago total" : "Adelanto 50%"} · Pedido: ${bs(total)}</small>
       </div>
-      <div class="field" style="margin-top:1rem">
-        <label>Comprobante de pago</label>
-        <label class="filedrop" id="fileDrop">
-          <input type="file" id="fFile" accept="image/*" hidden>
-          <span id="fileLabel">📎 Toca para subir la imagen del comprobante</span>
-        </label>
-      </div>`;
+      <div class="card-visual">
+        <div class="cv-top"><span class="cv-chip"></span><span class="cv-brand" id="cvBrand">TARJETA</span></div>
+        <div class="cv-number" id="cvNumber">•••• •••• •••• ••••</div>
+        <div class="cv-row"><span id="cvName">NOMBRE APELLIDO</span><span id="cvExp">MM/AA</span></div>
+      </div>
+      <div class="field"><label>Número de tarjeta</label>
+        <input id="ccNum" inputmode="numeric" maxlength="19" autocomplete="cc-number" placeholder="1234 5678 9012 3456"></div>
+      <div class="field"><label>Nombre en la tarjeta</label>
+        <input id="ccName" autocomplete="cc-name" placeholder="Como aparece en la tarjeta"></div>
+      <div class="field-row">
+        <div class="field"><label>Vencimiento</label><input id="ccExp" maxlength="5" autocomplete="cc-exp" placeholder="MM/AA"></div>
+        <div class="field"><label>CVV</label><input id="ccCvv" inputmode="numeric" maxlength="4" autocomplete="cc-csc" placeholder="123"></div>
+      </div>
+      <p class="pay-hint">💳 Modo demostración: usa cualquier número, por ejemplo <b>4242 4242 4242 4242</b>.</p>`;
     foot.innerHTML = `
       <div style="display:flex;gap:.5rem">
         <button class="btn btn-ghost" id="backCheckout">← Volver</button>
-        <button class="btn btn-green" style="flex:1" id="confirmOrder">Confirmar Pedido ✓</button>
+        <button class="btn btn-green" style="flex:1" id="payBtn">🔒 Pagar ${bs(aPagar)}</button>
       </div>`;
-    const fileInput = $("#fFile"), fileDrop = $("#fileDrop"), fileLabel = $("#fileLabel");
-    fileInput.onchange = () => {
-      if (fileInput.files[0]) {
-        draft.comprobante = fileInput.files[0].name;
-        fileDrop.classList.add("has-file");
-        fileLabel.textContent = "✅ " + fileInput.files[0].name;
-      }
+
+    const num = $("#ccNum"), name = $("#ccName"), exp = $("#ccExp"), cvv = $("#ccCvv");
+    // Formateo en vivo del número (grupos de 4) + marca + espejo en la tarjeta visual
+    num.oninput = () => {
+      let d = num.value.replace(/\D/g, "").slice(0, 16);
+      num.value = d.replace(/(.{4})/g, "$1 ").trim();
+      $("#cvNumber").textContent = (num.value || "•••• •••• •••• ••••").padEnd(19, "•");
+      $("#cvBrand").textContent = marcaTarjeta(d).toUpperCase();
     };
+    name.oninput = () => { $("#cvName").textContent = name.value.toUpperCase() || "NOMBRE APELLIDO"; };
+    exp.oninput = () => {
+      let d = exp.value.replace(/\D/g, "").slice(0, 4);
+      if (d.length >= 3) d = d.slice(0, 2) + "/" + d.slice(2);
+      exp.value = d;
+      $("#cvExp").textContent = d || "MM/AA";
+    };
+    cvv.oninput = () => { cvv.value = cvv.value.replace(/\D/g, ""); };
+
     $("#backCheckout").onclick = () => { view = "checkout"; renderDrawer(); };
-    $("#confirmOrder").onclick = () => {
-      if (!draft.comprobante) return toast("Sube tu comprobante de pago para confirmar", "warn");
-      confirmarPedido(aPagar);
+    $("#payBtn").onclick = () => {
+      const digits = num.value.replace(/\D/g, "");
+      if (digits.length < 13)                return toast("Ingresa un número de tarjeta válido", "warn");
+      if (!name.value.trim())                return toast("Ingresa el nombre de la tarjeta", "warn");
+      if (!/^\d{2}\/\d{2}$/.test(exp.value)) return toast("Ingresa el vencimiento (MM/AA)", "warn");
+      if (cvv.value.length < 3)              return toast("Ingresa el CVV", "warn");
+
+      // Simulación de pasarela de pago automática
+      const btn = $("#payBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<span class="btn-spin"></span> Procesando pago…`;
+      draft.metodoPago = `${marcaTarjeta(digits)} ····${digits.slice(-4)}`;
+      setTimeout(() => confirmarPedido(aPagar), 1500);
     };
   }
 
@@ -203,16 +229,17 @@
       items: items.map(it => ({ id: it.id, nombre: it.nombre, cantidad: it.cantidad, precio: it.precio })),
       detalle,
       total, montoPagado: aPagar, tipoPago: draft.pct === 100 ? "100% Total" : "50% Adelanto",
-      metodoPago: draft.metodoPago, comprobante: draft.comprobante,
+      metodoPago: draft.metodoPago, ref: "TX-" + Date.now().toString().slice(-7),
       fechaSubida: `${Store.fechaCorta(Store.HOY)} - ${((hh % 12) || 12)}:${mm} ${ampm}`,
       fechaEntrega: draft.fechaEntrega, horaEntrega: draft.horaEntrega,
-      cajas: cartCajas(), estadoPago: "pendiente", estadoPedido: "recibido",
+      // Pago automático: se aprueba al instante (pasarela simulada)
+      cajas: cartCajas(), estadoPago: "aprobado", estadoPedido: "recibido",
     };
     Store.addPedido(pedido);
     cart = {}; persist();
     draft = { _code: pedido.code };
     view = "success"; renderDrawer();
-    toast("¡Pedido registrado! Código " + pedido.code, "ok");
+    toast("¡Pago aprobado! Pedido " + pedido.code, "ok");
   }
 
   function renderSuccess(body, foot) {
@@ -223,7 +250,7 @@
         <h3 style="color:var(--brown-800);margin:0">¡Gracias por tu pedido!</h3>
         <p style="color:var(--muted)">Guarda tu código único de seguimiento:</p>
         <div class="big-code">${esc(code)}</div>
-        <p style="font-size:.86rem;color:var(--muted)">Tu comprobante quedó registrado y está <b>en validación</b>. Podrás seguir el avance de tu producción en tiempo real con este código.</p>
+        <p style="font-size:.86rem;color:var(--muted)">Tu pago fue <b>aprobado automáticamente</b> y tu pedido entró a la cola de producción. Podrás seguir el avance en tiempo real con este código.</p>
       </div>`;
     foot.innerHTML = `
       <button class="btn btn-navy btn-block" id="goTrack">🔍 Seguir mi pedido</button>

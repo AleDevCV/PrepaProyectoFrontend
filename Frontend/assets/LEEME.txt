@@ -1,0 +1,24 @@
+====================================================================
+ IMAGEN DEL HERO (portada del cliente)
+====================================================================
+
+Para reemplazar la ilustración de la portada por TU PROPIA FOTO:
+
+1) Guarda tu imagen en esta carpeta:
+      Frontend/assets/
+
+2) Con este nombre EXACTO (en minúsculas):
+      hero.jpg
+
+   Ruta final:  Frontend/assets/hero.jpg
+
+3) Recarga la página del cliente (cliente.html).
+   La foto aparecerá automáticamente en la portada.
+
+--------------------------------------------------------------------
+Notas:
+- Formato recomendado: JPG (también sirve PNG si lo renombras a hero.jpg).
+- Tamaño sugerido: ~800x600 px (horizontal). Se recorta para encajar.
+- Si el archivo no existe o se borra, la página muestra de forma
+  automática la ilustración de reserva (dibujada con CSS). No se rompe.
+====================================================================

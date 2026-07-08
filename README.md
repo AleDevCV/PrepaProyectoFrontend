@@ -21,20 +21,16 @@ Una vez publicado en GitHub Pages:
 ### 🛍️ A) Interfaz del Cliente — Consulta y Trazabilidad de Pedidos
 - **Seguimiento en tiempo real** por código único (ej: `CN-87X92`), con línea de tiempo de 3 pasos: *Recibido → En Cocina → Listo para Recojo*.
 - **Catálogo** de productos con **carrito de compras**.
-- **Checkout completo**: datos del pedido → **pago con QR** → **subida de comprobante** → generación de código de seguimiento.
+- **Checkout completo**: datos del pedido → **pago con tarjeta** (pasarela automática simulada) → generación de código de seguimiento.
 - **Agendamiento dinámico**: la fecha de entrega se asigna automáticamente según la capacidad diaria de producción.
 
 ### 📊 B) Interfaz del Administrador — Panel de Gestión de Producción y Pagos
-- **Validación de Pagos**: aprobar/rechazar comprobantes (con QR y visor de comprobante).
+- **Registro de Pagos**: historial de transacciones con tarjeta (aprobación automática) y total recaudado.
 - **Pedidos Pendientes**: indicadores (KPIs) y control del estado de producción.
 - **Agenda de Producción**: pedidos agrupados por día con medidor de capacidad (máx. 10 cajas/día).
 - **Alertas de control de producción diaria**.
 
-### 🤖 Asistente Virtual (Chatbot)
-- Widget flotante estilo WhatsApp en la tienda del cliente.
-- Versión actual **simulada** (basada en reglas), capaz de consultar el estado real de un pedido, precios, horarios, ubicación y métodos de pago.
-
-> **Integración:** ambas interfaces comparten datos mediante `localStorage`, por lo que funcionan como un sistema conectado: un pedido creado por el cliente aparece en el panel del administrador, y cuando el administrador valida el pago o avanza la producción, el cliente lo ve reflejado al consultar su código.
+> **Integración:** ambas interfaces comparten datos mediante `localStorage`, por lo que funcionan como un sistema conectado: un pedido creado por el cliente aparece al instante en el panel del administrador (pago ya aprobado por la pasarela), y cuando el administrador avanza la producción, el cliente lo ve reflejado al consultar su código.
 
 ---
 
@@ -46,9 +42,9 @@ Prueba el seguimiento en la interfaz del cliente con estos códigos:
 |-------------|-------------|--------------------|
 | `CN-87X92`  | A. Apaza    | En Producción      |
 | `CN-33C77`  | L. Gómez    | Listo para Recojo  |
-| `CN-11A04`  | A. Contili  | Recibido (pago por validar) |
+| `CN-11A04`  | A. Contili  | Recibido           |
 
-En el panel de administrador puedes aprobar los pagos pendientes (`CN-11A04`, `CN-45B21`) y ver cómo cambia el estado del cliente.
+En el panel de administrador puedes avanzar el estado de producción de cada pedido (Recibido → En Producción → Listo → Entregado) y ver cómo cambia en tiempo real la consulta del cliente.
 
 ---
 
@@ -73,15 +69,17 @@ PrepaProyecto/
     ├── index.html          # Página de entrada (elegir rol)
     ├── cliente.html        # A) Interfaz del Cliente
     ├── admin.html          # B) Panel del Administrador
+    ├── assets/             # Foto de portada del cliente (coloca aquí hero.jpg)
     ├── css/
     │   └── styles.css      # Estilos e identidad de marca
     └── js/
         ├── data.js         # Datos mock + almacén (localStorage)
-        ├── ui.js           # Utilidades (toasts, QR, formato)
+        ├── ui.js           # Utilidades (toasts, formato)
         ├── cliente.js      # Lógica del cliente
-        ├── admin.js        # Lógica del administrador
-        └── chatbot.js      # Asistente virtual simulado
+        └── admin.js        # Lógica del administrador
 ```
+
+> 🖼️ **Foto de portada:** para usar tu propia imagen en la portada del cliente, guárdala como `Frontend/assets/hero.jpg`. Si no existe, se muestra una ilustración de reserva.
 
 ---
 
@@ -125,7 +123,7 @@ git push -u origin main
 ## 📌 Notas
 
 - Es un **prototipo de solo frontend**: los datos son de demostración y viven en el navegador (`localStorage`). No hay servidor real ni persistencia entre dispositivos.
-- Los pagos con QR y los comprobantes son **simulados** para fines demostrativos.
+- El pago con tarjeta es una **pasarela automática simulada**: no se procesa ningún cobro real ni se envían datos a ningún servidor.
 - La carpeta `CONTEXTO-DOCUMENTACION/` (documento y mockups originales) está excluida del repositorio mediante `.gitignore`.
 
 ---

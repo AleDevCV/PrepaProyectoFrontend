@@ -29,7 +29,7 @@
     <div class="container">
       <button class="tab active" data-tab="pedidos">📋 Pedidos Pendientes</button>
       <button class="tab" data-tab="agenda">📅 Agenda de Producción</button>
-      <button class="tab" data-tab="pagos">💲 Validación de Pagos <span class="tab-badge" id="pagosBadge">0</span></button>
+      <button class="tab" data-tab="pagos">💳 Registro de Pagos</button>
     </div>
   </nav>
 
@@ -42,16 +42,6 @@
     <section id="tab-agenda" class="hidden"></section>
     <section id="tab-pagos" class="hidden"></section>
   </main>
-
-  <!-- Modal simple para "Ver comprobante" -->
-  <div class="overlay" id="proofOverlay"></div>
-  <div class="drawer" id="proofModal" style="left:50%;top:50%;right:auto;height:auto;width:min(360px,92vw);transform:translate(-50%,-50%) scale(.95);border-radius:18px;overflow:hidden">
-    <div class="drawer-head" style="background:var(--navy-800)">
-      <h3 id="proofTitle">Comprobante</h3>
-      <button class="x-btn" id="closeProof">×</button>
-    </div>
-    <div class="drawer-body" id="proofBody" style="text-align:center"></div>
-  </div>
 
   <script src="js/data.js"></script>
   <script src="js/ui.js"></script>

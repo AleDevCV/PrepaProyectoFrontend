@@ -7,7 +7,7 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "contidelicias_db_v2";
+  const STORAGE_KEY = "contidelicias_db_v3";
   const CAPACIDAD_MAXIMA_DIARIA = 10; // Cajas por día (según mockup del admin)
 
   /* ---------------- Catálogo de productos ---------------- */
@@ -30,7 +30,7 @@
       code: "CN-87X92", cliente: "A. Apaza", telefono: "700-11223",
       items: [{ id: "mixta24", nombre: "Caja Mixta (24 u.)", cantidad: 2, precio: 90 }],
       detalle: "2 Cajas de Alfajores Mixtos (24 u.)",
-      total: 180, montoPagado: 90, tipoPago: "50% Adelanto",
+      total: 180, montoPagado: 180, tipoPago: "Pago completo",
       metodoPago: "Visa ····4242", ref: "TX-8841207",
       fechaSubida: "07/07/2026 - 10:42 a.m.",
       fechaEntrega: "2026-07-07", horaEntrega: "16:00",
@@ -41,7 +41,7 @@
       items: [{ id: "familiar", nombre: "Caja Familiar (48 u.)", cantidad: 1, precio: 160 },
               { id: "choco12", nombre: "Caja de Chocolate (12 u.)", cantidad: 1, precio: 75 }],
       detalle: "1 Caja Familiar (48 u.) + 1 Caja de Chocolate",
-      total: 235, montoPagado: 235, tipoPago: "100% Total",
+      total: 235, montoPagado: 235, tipoPago: "Pago completo",
       metodoPago: "Mastercard ····5578", ref: "TX-8839114",
       fechaSubida: "06/07/2026 - 18:20 p.m.",
       fechaEntrega: "2026-07-07", horaEntrega: "11:00",
@@ -51,7 +51,7 @@
       code: "CN-33C77", cliente: "L. Gómez", telefono: "702-33417",
       items: [{ id: "dulce12", nombre: "Caja Dulce de Leche (12 u.)", cantidad: 1, precio: 65 }],
       detalle: "1 Caja Dulce de Leche (12 u.)",
-      total: 65, montoPagado: 65, tipoPago: "100% Total",
+      total: 65, montoPagado: 65, tipoPago: "Pago completo",
       metodoPago: "Visa ····4242", ref: "TX-8836540",
       fechaSubida: "06/07/2026 - 15:05 p.m.",
       fechaEntrega: "2026-07-07", horaEntrega: "09:00",
@@ -61,7 +61,7 @@
       code: "CN-90G33", cliente: "S. Méndez", telefono: "706-12045",
       items: [{ id: "mixta24", nombre: "Caja Mixta (24 u.)", cantidad: 2, precio: 90 }],
       detalle: "2 Cajas de Alfajores Mixtos (24 u.)",
-      total: 180, montoPagado: 90, tipoPago: "50% Adelanto",
+      total: 180, montoPagado: 180, tipoPago: "Pago completo",
       metodoPago: "Mastercard ····3310", ref: "TX-8842001",
       fechaSubida: "06/07/2026 - 20:10 p.m.",
       fechaEntrega: "2026-07-07", horaEntrega: "18:00",
@@ -71,7 +71,7 @@
       code: "CN-11A04", cliente: "A. Contili", telefono: "703-90128",
       items: [{ id: "choco12", nombre: "Caja de Chocolate (12 u.)", cantidad: 2, precio: 75 }],
       detalle: "2 Cajas de Chocolate (12 u.)",
-      total: 150, montoPagado: 150, tipoPago: "100% Total",
+      total: 150, montoPagado: 150, tipoPago: "Pago completo",
       metodoPago: "Visa ····1121", ref: "TX-8845093",
       fechaSubida: "07/07/2026 - 09:15 a.m.",
       fechaEntrega: "2026-07-08", horaEntrega: "10:00",
@@ -81,7 +81,7 @@
       code: "CN-45B21", cliente: "M. Rojas", telefono: "704-44562",
       items: [{ id: "maicena12", nombre: "Caja de Maicena (12 u.)", cantidad: 3, precio: 60 }],
       detalle: "3 Cajas de Maicena (12 u.)",
-      total: 180, montoPagado: 90, tipoPago: "50% Adelanto",
+      total: 180, montoPagado: 180, tipoPago: "Pago completo",
       metodoPago: "Amex ····9004", ref: "TX-8845210",
       fechaSubida: "07/07/2026 - 08:40 a.m.",
       fechaEntrega: "2026-07-08", horaEntrega: "17:00",
@@ -91,7 +91,7 @@
       code: "CN-70E90", cliente: "C. Flores", telefono: "705-77341",
       items: [{ id: "mixta24", nombre: "Caja Mixta (24 u.)", cantidad: 2, precio: 90 }],
       detalle: "2 Cajas de Alfajores Mixtos (24 u.)",
-      total: 180, montoPagado: 90, tipoPago: "50% Adelanto",
+      total: 180, montoPagado: 180, tipoPago: "Pago completo",
       metodoPago: "Mastercard ····5578", ref: "TX-8843377",
       fechaSubida: "07/07/2026 - 07:55 a.m.",
       fechaEntrega: "2026-07-09", horaEntrega: "12:00",

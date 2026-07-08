@@ -115,13 +115,8 @@
         <input value="${Store.fechaLarga(fechaISO)}" disabled>
         <p style="font-size:.78rem;color:var(--muted);margin:.3rem 0 0">📅 Asignada automáticamente según la producción diaria disponible (${cajas} caja(s)).</p>
       </div>
-      <div class="field-row">
-        <div class="field"><label>Hora de recojo</label>
-          <select id="fHora"><option>09:00</option><option>11:00</option><option selected>16:00</option><option>18:00</option></select>
-        </div>
-        <div class="field"><label>Adelanto</label>
-          <select id="fPago"><option value="50">50% Adelanto</option><option value="100">100% Total</option></select>
-        </div>
+      <div class="field"><label>Hora de recojo</label>
+        <select id="fHora"><option>09:00</option><option>11:00</option><option selected>16:00</option><option>18:00</option></select>
       </div>`;
     foot.innerHTML = `
       <div class="cart-summary"><span>Total del pedido</span><strong>${bs(cartTotal())}</strong></div>
@@ -137,7 +132,6 @@
       if (!tel)    return toast("Ingresa un teléfono de contacto", "warn");
       draft.cliente = nombre; draft.telefono = tel;
       draft.horaEntrega = $("#fHora").value;
-      draft.pct = Number($("#fPago").value);
       view = "payment"; renderDrawer();
     };
   }
@@ -154,13 +148,13 @@
 
   function renderPayment(body, foot) {
     const total = cartTotal();
-    const aPagar = draft.pct === 100 ? total : Math.round(total * 0.5 * 100) / 100;
+    const aPagar = total; // Pago completo del producto (100%)
     body.innerHTML = `
       <div class="pay-secure">🔒 Pago en línea seguro · procesado automáticamente</div>
       <div class="amount-box">
-        <span>Total a pagar ahora</span>
+        <span>Total a pagar</span>
         <strong>${bs(aPagar)}</strong>
-        <small>${draft.pct === 100 ? "Pago total" : "Adelanto 50%"} · Pedido: ${bs(total)}</small>
+        <small>Pago completo del pedido</small>
       </div>
       <div class="card-visual">
         <div class="cv-top"><span class="cv-chip"></span><span class="cv-brand" id="cvBrand">TARJETA</span></div>
@@ -228,7 +222,7 @@
       cliente: draft.cliente, telefono: draft.telefono,
       items: items.map(it => ({ id: it.id, nombre: it.nombre, cantidad: it.cantidad, precio: it.precio })),
       detalle,
-      total, montoPagado: aPagar, tipoPago: draft.pct === 100 ? "100% Total" : "50% Adelanto",
+      total, montoPagado: aPagar, tipoPago: "Pago completo",
       metodoPago: draft.metodoPago, ref: "TX-" + Date.now().toString().slice(-7),
       fechaSubida: `${Store.fechaCorta(Store.HOY)} - ${((hh % 12) || 12)}:${mm} ${ampm}`,
       fechaEntrega: draft.fechaEntrega, horaEntrega: draft.horaEntrega,

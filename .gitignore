@@ -1,0 +1,27 @@
+# ==== Documentación del proyecto (imágenes/PDF pesados, no se publica) ====
+CONTEXTO-DOCUMENTACION
+
+# ==== Variables de entorno / secretos ====
+.env
+.env.local
+.env.*.local
+
+# ==== Dependencias (por si más adelante se usa Node/npm) ====
+node_modules/
+package-lock.json
+yarn.lock
+
+# ==== Archivos del sistema operativo ====
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# ==== Editores / IDE ====
+.vscode/
+.idea/
+*.swp
+
+# ==== Logs y temporales ====
+*.log
+npm-debug.log*

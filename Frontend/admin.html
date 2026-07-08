@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contidelicias — Panel Administrativo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%231e2a55'/%3E%3Crect x='18' y='44' width='64' height='12' rx='6' fill='%23cdd7f2'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="admin-body">
+
+  <!-- ==================== ENCABEZADO ==================== -->
+  <header class="site-header admin-header">
+    <div class="container bar">
+      <a class="brand" href="index.html">
+        <span class="brand-logo">⚙️</span>
+        <span class="brand-name">PANEL ADMINISTRATIVO</span>
+        <span class="brand-tag">Contidelicias</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:.7rem">
+        <button class="btn btn-ghost btn-sm" id="resetBtn" style="color:#fff;border-color:rgba(255,255,255,.35)">↻ Reiniciar demo</button>
+        <a class="btn btn-red btn-sm" href="index.html">Salir ⏻</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== PESTAÑAS ==================== -->
+  <nav class="tabs">
+    <div class="container">
+      <button class="tab active" data-tab="pedidos">📋 Pedidos Pendientes</button>
+      <button class="tab" data-tab="agenda">📅 Agenda de Producción</button>
+      <button class="tab" data-tab="pagos">💲 Validación de Pagos <span class="tab-badge" id="pagosBadge">0</span></button>
+    </div>
+  </nav>
+
+  <main class="container admin-section">
+    <!-- Barra de capacidad (común) -->
+    <div class="capacity-bar" id="capacityBar"></div>
+
+    <!-- Contenido por pestaña -->
+    <section id="tab-pedidos"></section>
+    <section id="tab-agenda" class="hidden"></section>
+    <section id="tab-pagos" class="hidden"></section>
+  </main>
+
+  <!-- Modal simple para "Ver comprobante" -->
+  <div class="overlay" id="proofOverlay"></div>
+  <div class="drawer" id="proofModal" style="left:50%;top:50%;right:auto;height:auto;width:min(360px,92vw);transform:translate(-50%,-50%) scale(.95);border-radius:18px;overflow:hidden">
+    <div class="drawer-head" style="background:var(--navy-800)">
+      <h3 id="proofTitle">Comprobante</h3>
+      <button class="x-btn" id="closeProof">×</button>
+    </div>
+    <div class="drawer-body" id="proofBody" style="text-align:center"></div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contidelicias — Tienda y Seguimiento de Pedidos</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23d4a24e'/%3E%3Crect x='18' y='44' width='64' height='12' rx='6' fill='%237c4a1f'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ==================== ENCABEZADO ==================== -->
+  <header class="site-header">
+    <div class="container bar">
+      <a class="brand" href="index.html">
+        <span class="brand-logo">🥮</span>
+        <span class="brand-name">CONTIDELICIAS</span>
+        <span class="brand-tag">Alfajores Argentinos</span>
+      </a>
+      <nav class="nav">
+        <a href="#seguimiento" class="active">Seguir Pedido</a>
+        <a href="#catalogo">Catálogo</a>
+        <a href="admin.html">Panel Admin</a>
+      </nav>
+      <button class="cart-btn" id="cartBtn">
+        🛒 Mi Carrito <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== HERO + TRAZABILIDAD (Interfaz A) ==================== -->
+  <section class="hero" id="seguimiento">
+    <div class="container hero-grid">
+      <div class="alfajor-stack" aria-hidden="true">
+        <div class="plate"></div>
+        <div class="alfajor a1"><span class="coconut"></span></div>
+        <div class="alfajor a2"><span class="coconut"></span></div>
+        <div class="alfajor choco"></div>
+      </div>
+
+      <div class="hero-copy">
+        <h1>¡Sigue tu pedido en tiempo real!</h1>
+        <p class="lead">Ingresa el código único de 8 dígitos que recibiste al confirmar tu compra y conoce el estado exacto de tu producción.</p>
+
+        <div class="track-box">
+          <h2>🔎 Consulta de Trazabilidad</h2>
+          <form class="track-form" id="trackForm">
+            <input class="code-input" id="trackInput" placeholder="CN-XXXXX" maxlength="10" autocomplete="off" />
+            <button class="btn btn-navy" type="submit">🔍 Consultar</button>
+          </form>
+          <div class="chips">
+            Prueba con:
+            <span class="chip-code" data-code="CN-87X92">CN-87X92</span>
+            <span class="chip-code" data-code="CN-33C77">CN-33C77</span>
+            <span class="chip-code" data-code="CN-11A04">CN-11A04</span>
+          </div>
+        </div>
+
+        <!-- Resultado (se llena por JS) -->
+        <div id="trackResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CATÁLOGO ==================== -->
+  <section class="section container" id="catalogo">
+    <div class="section-head">
+      <div>
+        <h2>Nuestro Catálogo</h2>
+        <p>Alfajores artesanales elaborados con la receta tradicional argentina.</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="openCartBtn2">Ver carrito →</button>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <!-- ==================== PIE ==================== -->
+  <footer class="site-footer">
+    <div class="container fbar">
+      <div>
+        <strong style="color:#fff">CONTIDELICIAS</strong> — Alfajores Argentinos<br />
+        Comercial Chiriguano (3er Anillo Interno) · Santa Cruz de la Sierra, Bolivia
+      </div>
+      <div>
+        Atención automatizada 24/7 · <a href="#">WhatsApp</a><br />
+        <span style="opacity:.7">Prototipo frontend — Proyecto UAGRM</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== CARRITO / CHECKOUT (Drawer) ==================== -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+      <h3 id="drawerTitle">🛒 Mi Carrito</h3>
+      <button class="x-btn" id="closeDrawer">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-foot" id="drawerFoot"></div>
+  </aside>
+
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/cliente.js"></script>
+  <script src="js/chatbot.js"></script>
+</body>
+</html>

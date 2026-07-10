@@ -19,31 +19,90 @@
   function cartCount() { return cartItems().reduce((a, it) => a + it.cantidad, 0); }
   function updateCount() { $("#cartCount").textContent = cartCount(); }
 
-  /* ---------------- Catálogo ---------------- */
-  function iconClass(tipo) {
-    return tipo === "choco" ? "choco" : tipo === "dulce" ? "dulce" : tipo === "big" ? "big" : "";
-  }
+  /* ---------------- Catálogo (nuevo diseño inline) ---------------- */
   function renderCatalog() {
-    $("#productGrid").innerHTML = Store.PRODUCTOS.map(p => `
-      <article class="card product">
-        <div class="thumb"><div class="alfajor-icon ${iconClass(p.tipo)}"></div></div>
-        <div class="body">
-          <div class="p-name">${esc(p.nombre)}</div>
-          <div class="p-desc">${esc(p.desc)}</div>
-          <div class="p-foot">
-            <div><span class="p-price">${bs(p.precio)}</span></div>
-            <button class="btn btn-gold btn-sm" data-add="${p.id}">＋ Agregar</button>
-          </div>
+    const list = $("#productList");
+    if (!list) return;
+    list.innerHTML = Store.PRODUCTOS.map(p => `
+      <div class="order-item" data-id="${p.id}">
+        <div class="oi-img">🥮</div>
+        <div class="oi-info">
+          <div class="oi-name">${esc(p.nombre)}</div>
+          <div class="oi-price">${bs(p.precio)}</div>
         </div>
-      </article>`).join("");
+        <div class="oi-qty">
+          <button class="qty-dec" data-id="${p.id}">−</button>
+          <span class="qty-val" data-id="${p.id}">${cart[p.id] || 0}</span>
+          <button class="qty-inc" data-id="${p.id}">＋</button>
+        </div>
+        <button class="btn btn-gold btn-sm btn-add" data-id="${p.id}">Agregar</button>
+      </div>`).join("");
+
+    // Llenar selector de fechas (próximos 7 días)
+    const sel = $("#fechaEntregaSelect");
+    if (sel) {
+      const hoy = new Date();
+      // Usar la fecha base del proyecto
+      const baseStr = Store.HOY || "2026-07-10";
+      const base = new Date(parseInt(baseStr.split("-")[0]), parseInt(baseStr.split("-")[1]) - 1, parseInt(baseStr.split("-")[2]));
+      sel.innerHTML = "";
+      for (let i = 1; i <= 7; i++) {
+        const d = new Date(base);
+        d.setDate(base.getDate() + i);
+        const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+        const cap = Store.capacidadDia(iso);
+        const label = `${Store.nombreDia(iso)}, ${d.getDate()}/${String(d.getMonth()+1).padStart(2,"0")} (${cap.usadas}/${cap.max} disponibles)`;
+        const opt = document.createElement("option");
+        opt.value = iso;
+        opt.textContent = label;
+        if (i === 1) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
   }
+
+  /* Actualizar total y cantidades */
+  function updateOrderTotal() {
+    const total = cartTotal();
+    const el = $("#orderTotal");
+    if (el) el.textContent = `Total a pagar: ${bs(total)}`;
+    // Actualizar valores numéricos en cada producto
+    Store.PRODUCTOS.forEach(p => {
+      const span = document.querySelector(`.qty-val[data-id="${p.id}"]`);
+      if (span) span.textContent = cart[p.id] || 0;
+    });
+  }
+
+  /* Delegación de eventos para el catálogo inline */
   document.addEventListener("click", (e) => {
-    const add = e.target.closest("[data-add]");
-    if (add) {
-      const id = add.dataset.add;
+    const target = e.target;
+
+    // Botón Agregar
+    if (target.classList.contains("btn-add")) {
+      const id = target.dataset.id;
       cart[id] = (cart[id] || 0) + 1;
       persist();
+      updateOrderTotal();
       toast(`${prod(id).nombre} agregado al carrito`, "ok");
+    }
+
+    // Botón +
+    if (target.classList.contains("qty-inc")) {
+      const id = target.dataset.id;
+      cart[id] = (cart[id] || 0) + 1;
+      persist();
+      updateOrderTotal();
+    }
+
+    // Botón −
+    if (target.classList.contains("qty-dec")) {
+      const id = target.dataset.id;
+      if (cart[id]) {
+        cart[id]--;
+        if (cart[id] <= 0) delete cart[id];
+        persist();
+        updateOrderTotal();
+      }
     }
   });
 
@@ -329,7 +388,60 @@
   });
   document.querySelectorAll(".chip-code").forEach(ch => ch.addEventListener("click", () => consultar(ch.dataset.code)));
 
+  /* ---------------- Botón: Confirmar Pedido y Generar QR ---------------- */
+  const btnQR = $("#btnGenerarQR");
+  if (btnQR) {
+    btnQR.addEventListener("click", function () {
+      const items = cartItems();
+      if (!items.length) return toast("Agrega productos al carrito primero", "warn");
+
+      const nombre = prompt("Ingresa tu nombre y apellido para el pedido:");
+      if (!nombre || !nombre.trim()) return toast("Necesitamos tu nombre para continuar", "warn");
+      const telefono = prompt("Ingresa tu teléfono de contacto (WhatsApp):");
+      if (!telefono || !telefono.trim()) return toast("Necesitamos tu teléfono para continuar", "warn");
+
+      const total = cartTotal();
+      const cajas = cartCajas();
+      const detalle = items.map(it => `${it.cantidad} × ${it.nombre.replace(/\s*\(.*\)/, "")}`).join(", ");
+      const now = new Date();
+      const hh = now.getHours(), mm = String(now.getMinutes()).padStart(2, "0");
+      const ampm = hh < 12 ? "a.m." : "p.m.";
+
+      // Generar código de pedido formato #PED-XXXX
+      const code = "#PED-" + String(Store.getPedidos().length + 1).padStart(4, "0");
+
+      // Guardar en Store (pedido real)
+      const fechaEntrega = $("#fechaEntregaSelect")?.value || Store.proximaFechaDisponible(cajas);
+      const pedido = {
+        code, cliente: nombre.trim(), telefono: telefono.trim(),
+        items: items.map(it => ({ id: it.id, nombre: it.nombre, cantidad: it.cantidad, precio: it.precio })),
+        detalle, total, montoPagado: total, tipoPago: "Pago completo",
+        metodoPago: "QR",
+        ref: "TX-" + Date.now().toString().slice(-7),
+        fechaSubida: `${Store.fechaCorta(Store.HOY)} - ${((hh % 12) || 12)}:${mm} ${ampm}`,
+        fechaEntrega, horaEntrega: "16:00",
+        cajas, estadoPago: "pendiente", estadoPedido: "recibido",
+      };
+      Store.addPedido(pedido);
+
+      // Guardar en sessionStorage para la pantalla de pago QR
+      const qrData = {
+        code, cliente: nombre.trim(),
+        items: items.map(it => ({ nombre: it.nombre, cantidad: it.cantidad, precio: it.precio })),
+        total, fechaEntrega
+      };
+      sessionStorage.setItem("conti_pedido_qr", JSON.stringify(qrData));
+
+      // Limpiar carrito
+      cart = {}; persist();
+
+      // Ir a pantalla de pago QR
+      window.location.href = "pago-qr.html";
+    });
+  }
+
   /* ---------------- Inicio ---------------- */
   renderCatalog();
   updateCount();
+  updateOrderTotal();
 })();

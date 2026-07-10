@@ -68,16 +68,24 @@
     </div>
   </section>
 
-  <!-- ==================== CATÁLOGO ==================== -->
-  <section class="section container" id="catalogo">
-    <div class="section-head">
-      <div>
-        <h2>Nuestro Catálogo</h2>
-        <p>Alfajores artesanales elaborados con la receta tradicional argentina.</p>
+  <!-- ==================== CATÁLOGO / PEDIDO ONLINE ==================== -->
+  <section class="section" id="catalogo">
+    <div class="container order-online">
+      <h1>🍬 CONTIDELICIAS — PEDIDO ONLINE</h1>
+      <p class="sub">Catálogo de Alfajores Argentinos</p>
+
+      <div id="productList"></div>
+
+      <div class="order-summary">
+        <div class="os-row">
+          <label for="fechaEntregaSelect">📅 Fecha de entrega solicitada</label>
+          <select id="fechaEntregaSelect"></select>
+        </div>
+        <p style="font-size:.78rem;color:var(--muted);margin:-.3rem 0 .6rem">* Disponibilidad verificada por el sistema.</p>
+        <div class="os-total" id="orderTotal">Total a pagar: Bs 0.00</div>
+        <button class="btn btn-gold btn-block" id="btnGenerarQR">✅ Confirmar Pedido y Generar QR</button>
       </div>
-      <button class="btn btn-ghost btn-sm" id="openCartBtn2">Ver carrito →</button>
     </div>
-    <div class="product-grid" id="productGrid"></div>
   </section>
 
   <!-- ==================== PIE ==================== -->

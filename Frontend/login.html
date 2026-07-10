@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contidelicias — Inicio de Sesión</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%231e2a55'/%3E%3Crect x='18' y='44' width='64' height='12' rx='6' fill='%23cdd7f2'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <div class="logo-big">⚙️</div>
+    <h1>SISTEMA DE GESTIÓN<br />CONTIDELICIAS</h1>
+    <p class="sub">Ingrese sus credenciales para acceder al panel</p>
+
+    <p class="login-error" id="loginError">Usuario o contraseña incorrectos</p>
+
+    <div class="field">
+      <label for="userInput">Usuario</label>
+      <input type="text" id="userInput" placeholder="admin" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label for="passInput">Contraseña</label>
+      <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <button class="btn btn-navy btn-block" id="loginBtn">🔐 Ingresar</button>
+
+    <a class="forgot" href="#">¿Olvidó su contraseña?</a>
+  </div>
+
+  <script>
+    (function () {
+      const userInput = document.getElementById("userInput");
+      const passInput = document.getElementById("passInput");
+      const loginBtn = document.getElementById("loginBtn");
+      const errorEl = document.getElementById("loginError");
+
+      function doLogin() {
+        const user = userInput.value.trim();
+        const pass = passInput.value.trim();
+        // Credenciales de demo
+        if (user === "admin" && pass === "admin") {
+          errorEl.style.display = "none";
+          window.location.href = "admin-dashboard.html";
+        } else {
+          errorEl.style.display = "block";
+        }
+      }
+
+      loginBtn.addEventListener("click", doLogin);
+      passInput.addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+      userInput.addEventListener("keydown", (e) => { if (e.key === "Enter") passInput.focus(); });
+    })();
+  </script>
+</body>
+</html>

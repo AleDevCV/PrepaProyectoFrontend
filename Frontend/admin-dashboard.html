@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contidelicias — Panel de Administración</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%231e2a55'/%3E%3Crect x='18' y='44' width='64' height='12' rx='6' fill='%23cdd7f2'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- ==================== SIDEBAR / MENÚ ==================== -->
+    <aside class="admin-sidebar">
+      <div class="sb-brand">
+        <div class="sb-logo">🥮</div>
+        <div>
+          <div class="sb-name">CONTIDELICIAS</div>
+          <div class="sb-tag">Panel Administrativo</div>
+        </div>
+      </div>
+      <nav class="sb-menu">
+        <a href="admin-dashboard.html" class="active"><span class="sb-ico">🏠</span> Inicio</a>
+        <a href="admin.html"><span class="sb-ico">📋</span> Gestión de Pedidos</a>
+        <a href="admin.html#tab-agenda"><span class="sb-ico">📅</span> Agenda y Producción</a>
+        <a href="cliente.html#catalogo"><span class="sb-ico">📦</span> Catálogo de Productos</a>
+        <a href="#"><span class="sb-ico">📊</span> Reportes</a>
+      </nav>
+      <div class="sb-foot">
+        <a href="login.html"><span class="sb-ico">🚪</span> Salir</a>
+      </div>
+    </aside>
+
+    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+    <main class="admin-main">
+      <h1>Bienvenido al Panel de Contidelicias</h1>
+      <div class="date-badge" id="dateDisplay"></div>
+
+      <!-- Capacidad de Producción -->
+      <div class="capacity-wide" id="capacitySection">
+        <div class="cap-header">
+          <strong>📦 Capacidad de Producción Diaria</strong>
+          <span id="capLabel">0 / 0 Pedidos</span>
+        </div>
+        <div class="cap-track">
+          <div class="cap-fill" id="capFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Métricas de Hoy -->
+      <div class="metrics-row" id="metricsRow">
+        <div class="metric-card">
+          <div class="mc-ico">📥</div>
+          <div class="mc-val" id="metPedidos">0</div>
+          <div class="mc-lbl">Pedidos Ingresados (Web/Chatbot)</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-ico">✅</div>
+          <div class="mc-val" id="metPagos">0</div>
+          <div class="mc-lbl">Pagos QR Confirmados</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-ico">📤</div>
+          <div class="mc-val" id="metPendientes">0</div>
+          <div class="mc-lbl">Pendientes de Envío</div>
+        </div>
+        <div class="metric-card">
+          <div class="mc-ico">💰</div>
+          <div class="mc-val" id="metRecaudado">Bs 0</div>
+          <div class="mc-lbl">Recaudado (Hoy)</div>
+        </div>
+      </div>
+
+      <!-- Últimas Transacciones -->
+      <div class="section-title">📄 Últimas Transacciones</div>
+      <table class="transactions-table" id="transTable">
+        <thead>
+          <tr>
+            <th># Pedido</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="transBody"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ---- Fecha actual ---- */
+      const ahora = new Date();
+      const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+      const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+      document.getElementById("dateDisplay").textContent =
+        `${dias[ahora.getDay()]}, ${ahora.getDate()} de ${meses[ahora.getMonth()]} de ${ahora.getUTCFullYear()}`;
+
+      /* ---- Capacidad ---- */
+      function actualizarDashboard() {
+        const pedidos = Store.getPedidos();
+        const activos = pedidos.filter(p => p.estadoPago !== "rechazado" && p.estadoPedido !== "entregado");
+        const totalActivos = activos.length;
+        const capacidadMax = 20; // Mostramos sobre 20 para el dashboard
+
+        document.getElementById("capLabel").textContent = `${totalActivos} / ${capacidadMax} Pedidos`;
+        document.getElementById("capFill").style.width = Math.min(100, (totalActivos / capacidadMax) * 100) + "%";
+
+        // Métricas
+        document.getElementById("metPedidos").textContent = totalActivos;
+        document.getElementById("metPagos").textContent = pedidos.filter(p => p.estadoPago === "aprobado").length;
+        document.getElementById("metPendientes").textContent = activos.filter(p => p.estadoPedido !== "listo" && p.estadoPedido !== "entregado").length;
+        const recaudado = pedidos.reduce((a, p) => a + (p.montoPagado || 0), 0);
+        document.getElementById("metRecaudado").textContent = "Bs " + recaudado.toFixed(2);
+
+        // Últimas transacciones (mostrar las 5 más recientes)
+        const recientes = [...pedidos].reverse().slice(0, 5);
+        document.getElementById("transBody").innerHTML = recientes.map(p => `
+          <tr>
+            <td><strong>${p.code}</strong></td>
+            <td>${p.cliente}</td>
+            <td>Bs ${(p.montoPagado || p.total).toFixed(2)}</td>
+            <td><span class="badge-paid">${p.estadoPago === "aprobado" ? "PAGADO" : p.estadoPago === "pendiente" ? "PENDIENTE" : "RECHAZADO"}</span></td>
+          </tr>`).join("");
+      }
+
+      // Esperar a que Store esté disponible
+      if (window.Store) {
+        actualizarDashboard();
+      } else {
+        document.addEventListener("DOMContentLoaded", () => {
+          if (window.Store) actualizarDashboard();
+          else setTimeout(actualizarDashboard, 500);
+        });
+      }
+    })();
+  </script>
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

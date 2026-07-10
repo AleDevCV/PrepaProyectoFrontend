@@ -1,5 +1,6 @@
 # ==== Documentación del proyecto (imágenes/PDF pesados, no se publica) ====
 CONTEXTO-DOCUMENTACION
+PrepaProyecto.code-workspace
 
 # ==== Variables de entorno / secretos ====
 .env

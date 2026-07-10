@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contidelicias — Pago con QR</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23d4a24e'/%3E%3Crect x='18' y='44' width='64' height='12' rx='6' fill='%237c4a1f'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="qr-pago-page">
+  <div class="qr-pago-card">
+    <h1>💳 PAGO DE PEDIDO</h1>
+    <p class="qp-ref" id="qpCliente">Cliente: <strong id="clienteNombre">—</strong></p>
+    <p class="qp-ref">Pedido: <strong id="pedidoCode">#PED-0000</strong></p>
+
+    <div class="qp-detail" id="qpDetail">
+      <!-- Se llena por JS -->
+    </div>
+
+    <!-- QR Code generado con SVG -->
+    <div class="qr-box">
+      <svg id="qrSvg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <rect width="160" height="160" fill="#fff" rx="8"/>
+        <!-- Patrón decorativo tipo QR -->
+        <g fill="#2e1b14">
+          <rect x="10" y="10" width="30" height="30" rx="4" fill="#2e1b14"/>
+          <rect x="16" y="16" width="18" height="18" rx="2" fill="#fff"/>
+          <rect x="120" y="10" width="30" height="30" rx="4" fill="#2e1b14"/>
+          <rect x="126" y="16" width="18" height="18" rx="2" fill="#fff"/>
+          <rect x="10" y="120" width="30" height="30" rx="4" fill="#2e1b14"/>
+          <rect x="16" y="126" width="18" height="18" rx="2" fill="#fff"/>
+          <!-- Puntos aleatorios decorativos -->
+          <rect x="55" y="15" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="75" y="25" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="95" y="10" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="60" y="40" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="80" y="50" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="100" y="40" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="50" y="70" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="70" y="65" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="90" y="75" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="110" y="60" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="55" y="90" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="75" y="95" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="60" y="110" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="90" y="105" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="50" y="130" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="70" y="135" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="100" y="125" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="120" y="90" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="130" y="110" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="125" y="130" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="30" y="60" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="25" y="80" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="35" y="100" width="6" height="6" rx="1" fill="#2e1b14"/>
+          <rect x="40" y="45" width="4" height="4" rx="1" fill="#2e1b14"/>
+          <rect x="105" y="85" width="4" height="4" rx="1" fill="#2e1b14"/>
+          <rect x="85" y="120" width="4" height="4" rx="1" fill="#2e1b14"/>
+          <rect x="115" y="45" width="4" height="4" rx="1" fill="#2e1b14"/>
+          <rect x="45" y="105" width="4" height="4" rx="1" fill="#2e1b14"/>
+          <rect x="65" y="80" width="4" height="4" rx="1" fill="#2e1b14"/>
+        </g>
+      </svg>
+    </div>
+
+    <p>Escanee el código QR para realizar el pago.</p>
+
+    <div class="qp-status">
+      <span class="spinner"></span>
+      <span>ESPERANDO CONFIRMACIÓN...</span>
+    </div>
+
+    <p class="qp-hint">*Esta pantalla se actualizará automáticamente.</p>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // Cargar datos del pedido desde sessionStorage
+      const pedidoData = JSON.parse(sessionStorage.getItem("conti_pedido_qr") || "{}");
+
+      document.getElementById("clienteNombre").textContent = pedidoData.cliente || "—";
+      document.getElementById("pedidoCode").textContent = pedidoData.code || "#PED-0000";
+
+      const detail = document.getElementById("qpDetail");
+      if (pedidoData.items && pedidoData.items.length) {
+        detail.innerHTML = pedidoData.items.map(it =>
+          `<div class="qp-line"><span>${it.cantidad}x ${it.nombre}</span><span>Bs ${(it.precio * it.cantidad).toFixed(2)}</span></div>`
+        ).join("") +
+        `<div class="qp-line total"><span>Total a pagar</span><span>Bs ${(pedidoData.total || 0).toFixed(2)}</span></div>`;
+      } else {
+        detail.innerHTML = `<div class="qp-line">1x Caja Alfajor de Maicena (x6)</div>
+          <div class="qp-line total"><span>Total a pagar</span><span>Bs ${(pedidoData.total || 30).toFixed(2)}</span></div>`;
+      }
+
+      // Simular confirmación automática después de 5 segundos
+      setTimeout(() => {
+        // Guardar datos para la página de confirmación
+        const confirmData = {
+          code: pedidoData.code || "#PED-0147",
+          cliente: pedidoData.cliente || "Cliente",
+          total: pedidoData.total || 30,
+          transaccion: "TRX-" + Math.floor(1000000 + Math.random() * 9000000),
+          fecha: new Date().toLocaleDateString("es-BO"),
+          hora: new Date().toLocaleTimeString("es-BO", { hour: '2-digit', minute: '2-digit' })
+        };
+        sessionStorage.setItem("conti_pago_confirmado", JSON.stringify(confirmData));
+        window.location.href = "pago-confirmado.html";
+      }, 5000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contidelicias — Pago Confirmado</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%232e9e5b'/%3E%3Crect x='18' y='44' width='64' height='12' rx='6' fill='%23bfe6cd'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="confirm-page">
+  <div class="confirm-card">
+    <div class="cf-header">
+      <div class="cf-icon">✅</div>
+      <h1>PAGO CONFIRMADO</h1>
+      <p class="cf-sub">Su transacción fue procesada exitosamente</p>
+    </div>
+
+    <div class="cf-details">
+      <div class="cf-row">
+        <span class="cf-lbl">Número Transacción Banco</span>
+        <span class="cf-val" id="cfTransaccion">TRX-9988776</span>
+      </div>
+      <div class="cf-row">
+        <span class="cf-lbl">Fecha</span>
+        <span class="cf-val" id="cfFecha">10/07/2026</span>
+      </div>
+      <div class="cf-row">
+        <span class="cf-lbl">Hora</span>
+        <span class="cf-val" id="cfHora">14:30</span>
+      </div>
+      <div class="cf-row">
+        <span class="cf-lbl">Importe recibido</span>
+        <span class="cf-val" id="cfImporte">Bs. 30.00</span>
+      </div>
+    </div>
+
+    <div class="cf-status">
+      <span class="cf-status-text">✅ CONFIRMADO EXITOSAMENTE</span>
+    </div>
+
+    <p style="text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:.5rem">
+      Su pedido ingresó a nuestra agenda de producción.
+    </p>
+
+    <div class="cf-tracking">
+      <div class="cf-track-label">CÓDIGO DE SEGUIMIENTO</div>
+      <div class="cf-track-code" id="cfTrackingCode">#PED-0147</div>
+      <div class="cf-track-hint">
+        * Puede consultar el estado de su pedido enviando<br />
+        este código a nuestro <strong>Asistente de WhatsApp</strong>.
+      </div>
+    </div>
+
+    <button class="btn btn-green btn-block" id="downloadPdfBtn">📄 Descargar Comprobante PDF</button>
+    <br /><br />
+    <a href="cliente.html" class="btn btn-gold btn-block" style="text-decoration:none">← Volver a la Tienda</a>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // Cargar datos de confirmación desde sessionStorage
+      const data = JSON.parse(sessionStorage.getItem("conti_pago_confirmado") || "{}");
+
+      document.getElementById("cfTransaccion").textContent = data.transaccion || "TRX-9988776";
+      document.getElementById("cfFecha").textContent = data.fecha || "10/07/2026";
+      document.getElementById("cfHora").textContent = data.hora || "14:30";
+      document.getElementById("cfImporte").textContent = "Bs. " + (data.total || 30).toFixed(2);
+      document.getElementById("cfTrackingCode").textContent = data.code || "#PED-0147";
+
+      // Simular descarga de PDF
+      document.getElementById("downloadPdfBtn").addEventListener("click", function () {
+        const code = data.code || "#PED-0147";
+        const trans = data.transaccion || "TRX-9988776";
+        const total = (data.total || 30).toFixed(2);
+
+        // Crear un Blob con el contenido del comprobante
+        const content = `
+  ╔══════════════════════════════════════╗
+  ║    CONTIDELICIAS — COMPROBANTE      ║
+  ║    Alfajores Argentinos              ║
+  ╚══════════════════════════════════════╝
+
+  Número Transacción: ${trans}
+  Fecha: ${data.fecha || "10/07/2026"}
+  Hora: ${data.hora || "14:30"}
+  Importe recibido: Bs. ${total}
+
+  Estado del Pago: CONFIRMADO EXITOSAMENTE
+
+  Su pedido ingresó a nuestra agenda de producción.
+
+  CÓDIGO DE SEGUIMIENTO: ${code}
+
+  * Puede consultar el estado de su pedido enviando
+    este código a nuestro Asistente de WhatsApp.
+
+  — Contidelicias · Comercial Chiriguano
+    Santa Cruz de la Sierra, Bolivia
+        `;
+
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Comprobante_${code.replace("#","")}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+    })();
+  </script>
+</body>
+</html>
